@@ -32,7 +32,8 @@
     paper-fab {
 	    position: absolute;
 	    bottom: 3vh;
-	    right: 3vw;
+		right: 3vw;
+		background: #4DD0E1;
     }
     
     .done {
@@ -67,7 +68,7 @@
   <template>
     <!-- local DOM for your element -->
 	
-    <paper-material class="todo">
+    <paper-material class="todo" elevation="1">
 	    <paper-checkbox checked="{{completed}}"></paper-checkbox>
 	    <paper-fab hidden={{editing}}  icon="icons:create" on-tap="doEdit" class="edit" mini></paper-fab>
 	    <paper-fab hidden={{!editing}} icon="icons:done"   on-tap="doEdit" class="done" mini></paper-fab>
@@ -120,6 +121,7 @@
     },
     doEdit: function(e){
     	this.editing=!this.editing;
+    	if (!this.editing){ this.fire('edit', {rid:this.rid, task:this.task}); }
 	},
 	ready: function(e){
 	}

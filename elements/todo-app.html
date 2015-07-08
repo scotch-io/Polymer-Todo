@@ -60,7 +60,7 @@
   
 	paper-fab {
 	    position: absolute;
-	    background: #3f51b5;
+	    background: #00BCD4;
 	    bottom: 2vh;
 	    right: 2vw;
     }
@@ -77,6 +77,24 @@
 		color: #6f6f6f;
 	}
 
+	paper-toolbar {
+		background:#D32F2F;
+	}
+	
+	#made-with {
+		width:100%;
+		margin:0;
+		position: fixed;
+		bottom: 0;
+		text-align: center;
+	}
+	
+	#made-with img {
+		width: 35%;
+		padding: 10px;
+	}
+	
+
 	</style>
   
 	<template>
@@ -88,15 +106,18 @@
 				<paper-menu id="completed" class="list">
 					<template is="dom-if" if="{{!done.length}}">
 						<paper-material class="task-empty">
-							<paper-item>Completed tasks will appear here!</paper-item>
+							<paper-item elevation="2">Completed tasks will appear here!</paper-item>
 						</paper-material>
 					</template>
 					<template id="done" is="dom-repeat" items="{{done}}">
 						<paper-item>{{item.task}}<i style="margin-left: 5px;">{{item.user}}</i></paper-item>
 					</template>
 				</paper-menu>
+				<paper-material id="made-with" elevation="2">
+					<a href="http://www.pubnub.com/"><img src="../img/made-with.png"/></a>
+				</div>
 			</paper-header-panel>
-			<paper-header-panel main class="main-panel" flex>
+			<paper-header-panel main class="main-panel">
 				<paper-toolbar>
 					<paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
 					<paper-item>
@@ -107,15 +128,15 @@
 				</paper-toolbar>
 				<div style="border-left: 1px solid #ccc;">
 					<!-- To create a new Todo -->
-					<paper-material id="todoEntry" flex>
+					<paper-material id="todoEntry" elevation="2">
 						<paper-input id="tTask" label="Task"></paper-input>
 						<paper-input id="tUser" char-counter label="Username" maxlength="16" error="maximum characters exceeded" style="width:75%;display: inline-block" ></paper-input> 
 						<paper-fab icon="icons:add" on-tap="postTask"></paper-fab>
 					</paper-material>
-					<div id="todos" flex>
+					<div id="todos">
 						<template is="dom-if" if="{{!todo.length}}">
 							<paper-material class="task-empty">
-								<paper-item>No Tasks remain. Updates are Real-Time so stay tuned!</paper-item>
+								<paper-item elevation="2">No Tasks remain. Updates are Real-Time so stay tuned!</paper-item>
 							</paper-material>
 						</template>
 						<template id="tasks" is="dom-repeat" items="{{todo}}">
@@ -140,12 +161,11 @@
     is: "todo-app",
 
     // add properties and methods on the element's prototype
-
     properties: {
     	// declare properties for the element's public API
 		todo: {
 			type: Array,
-			value: [{user:"Kevin",task:"Watch the Cavs lose :(",rid:0}, {user:"Justin",task:"Sign up for PubNub",rid:1}, {user:"Tomomi",task:"Think of task.",rid:2}]
+			value: [{user:"Kevin",task:"Make a Polymer app!",rid:0}, {user:"Justin",task:"Drink some scotch.io",rid:1}, {user:"Tomomi",task:"Think of task.",rid:2}]
 		},
 		done:{
 			type:Array,
@@ -166,6 +186,15 @@
 	    itm.task = e.target.task;
 	    itm.user = this.$.tUser.value;
 	    itm.type = "done";
+	    this.$.pub.message = itm;
+	    this.$.pub.publish();
+    },
+    handleEdit: function(e){
+	    var idx = findWithAttr(this.todo, 'rid', e.target.rid);
+	    var itm = this.todo[idx];
+	    itm.task = e.target.task;
+	    itm.user = this.$.tUser.value;
+	    itm.type = "edit";
 	    this.$.pub.message = itm;
 	    this.$.pub.publish();
     },
@@ -190,11 +219,21 @@
 			    	break;
 			    case "done":
 			    	var idx = findWithAttr(this.todo, 'rid',item.rid);
+				    
+				    if (idx == -1){return;}
 				    var itm = this.splice('todo', idx, 1)[0];
 				    itm.task = item.task;
 				    itm.user = item.user;
-				    this.push('done',itm);
+				    this.unshift('done',itm);
 				    break;
+				case "edit":
+					var idx = findWithAttr(this.todo, 'rid',item.rid);
+					if (idx == -1){return;}
+					var itm = this.splice('todo', idx, 1)[0];
+				    itm.task = item.task;
+				    itm.user = item.user;
+					this.unshift('todo',{task:item.task, user:item.user, rid:item.rid});
+					break;
 				default:
 					continue;
 		    }
@@ -202,13 +241,19 @@
     },
 	ready: function(e){
 		this.addEventListener('complete', this.handleComplete);
+		this.addEventListener('edit', this.handleEdit);
 		this.$.tUser.value = randItem(names1) + "-" + randItem(names2);
 		console.log(this.present);
-	this.addEventListener('presence', presChange);
-	function presChange(e){
-		var pres = this.present.pop()
-		this.$.here.innerHTML = pres.occupancy;
-	}
+		this.addEventListener('presence', presChange);
+		function presChange(e){
+			var pres = this.present.pop()
+			this.$.here.innerHTML = pres.occupancy;
+		}
+		var todos = this.$.todos;
+		window.onresize = function(event) {
+			todos.style.height = window.innerHeight-200;
+		};
+		window.onresize();
 	}
   });
   var names1 = ["red","orange","yellow","green","blue","indigo","purple"];
@@ -224,6 +269,6 @@
         if(array[i][attr] === value) {
             return i;
         }
-    }
+    } return -1;
   }
 </script>

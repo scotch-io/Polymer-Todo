@@ -1,6 +1,6 @@
 {
   "name": "iron-input",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An input element with data binding",
   "authors": [
     "The Polymer Authors"
@@ -33,11 +33,11 @@
     "web-component-tester": "*",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   },
-  "_release": "1.0.2",
+  "_release": "1.0.3",
   "_resolution": {
     "type": "version",
-    "tag": "v1.0.2",
-    "commit": "68890dc3a2c614ec1c2b1496a4210cdf36cbb0f9"
+    "tag": "v1.0.3",
+    "commit": "edb505f41d67120cb505deedb92aa69e90078d2f"
   },
   "_source": "git://github.com/polymerelements/iron-input.git",
   "_target": "^1.0.0",
